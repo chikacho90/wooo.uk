@@ -9,6 +9,7 @@
     "vercel-build": "next build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.94.0",
     "@neondatabase/serverless": "^1.1.0",
     "@types/three": "^0.183.1",
     "next": "16.1.6",
