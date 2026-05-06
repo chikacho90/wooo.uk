@@ -56,6 +56,13 @@ html, body {
   50% { scale: 1.08; opacity: 0.7; }
 }
 
+@keyframes crt-jitter {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-1px, 1px); }
+  66% { transform: translate(1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
 
 @supports (-webkit-touch-callout: none) {
   input, textarea, select {
