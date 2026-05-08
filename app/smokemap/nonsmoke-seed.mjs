@@ -50,7 +50,7 @@ async function overpass(query) {
   const res = await fetch(url, {
     headers: {
       "Accept": "application/json",
-      "User-Agent": "smokemap-seed/1.0 (woo.moi)",
+      "User-Agent": "smokemap-seed/1.0 (wooo.uk)",
     },
   });
   if (!res.ok) {

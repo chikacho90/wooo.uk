@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Bumblebee — woo.moi",
+  title: "Bumblebee — wooo.uk",
   description:
     "Talk to a bot that can't speak in his own words — he answers with movie lines, song lyrics, and famous phrases.",
 };

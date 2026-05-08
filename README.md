@@ -1,4 +1,4 @@
-# woo.moi
+# wooo.uk
 
 Creative developer portfolio — Next.js + React + Tailwind CSS + Three.js
 
