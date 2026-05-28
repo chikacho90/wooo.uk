@@ -1,151 +1,53 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useGate } from "./_landing/useGate";
+import GateModal from "./_landing/GateModal";
+import VariantSwitcher from "./_landing/VariantSwitcher";
+import Shader from "./_landing/Shader";
+import Typography from "./_landing/Typography";
+import Particles from "./_landing/Particles";
+import WorkCards from "./_landing/WorkCards";
+import Terminal from "./_landing/Terminal";
+import Combo from "./_landing/Combo";
+import { VARIANT_STORAGE_KEY, type Variant } from "./_landing/variants";
 
-const BG_LOCKED = "#06060f";
-const BG_UNLOCKED = "#0f0618";
+const DEFAULT_VARIANT: Variant = "combo";
+const TERMINAL_VARIANTS = new Set<Variant>(["terminal", "combo"]);
 
 export default function Home() {
-  const [authed, setAuthed] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
-  const [shake, setShake] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
+  const gate = useGate();
+  const [variant, setVariant] = useState<Variant>(DEFAULT_VARIANT);
+  const [mounted, setMounted] = useState(false);
 
-  // Check session on mount
   useEffect(() => {
-    fetch("/api/session", { credentials: "same-origin" })
-      .then((r) => r.json())
-      .then((d) => setAuthed(Boolean(d?.authed)))
-      .catch(() => {});
+    const saved = localStorage.getItem(VARIANT_STORAGE_KEY) as Variant | null;
+    if (saved) setVariant(saved);
+    setMounted(true);
   }, []);
 
-  const close = useCallback(() => {
-    setOpen(false);
-    setValue("");
-    setShake(false);
-  }, []);
-
-  const submit = useCallback(async () => {
-    if (!value.trim()) return;
-
-    // Route commands when authed
-    if (authed && value.startsWith("/")) {
-      const route = value.trim();
-      close();
-      router.push(route);
-      return;
-    }
-
-    if (authed) {
-      // Logout: type password again to lock
-      const r = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: value }),
-        credentials: "same-origin",
-      });
-      if (r.ok) {
-        await fetch("/api/logout", { method: "POST", credentials: "same-origin" });
-        setAuthed(false);
-        close();
-      } else {
-        setShake(true);
-        setValue("");
-        setTimeout(() => setShake(false), 500);
-      }
-    } else {
-      // Login
-      const r = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: value }),
-        credentials: "same-origin",
-      });
-      if (r.ok) {
-        setAuthed(true);
-        close();
-      } else {
-        setShake(true);
-        setValue("");
-        setTimeout(() => setShake(false), 500);
-      }
-    }
-  }, [value, authed, close]);
-
-  // Desktop: Enter to open
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (open) return;
-      const tag = (e.target as HTMLElement)?.tagName?.toUpperCase();
-      if (tag === "INPUT" || tag === "TEXTAREA") return;
-      if (e.key === "Enter") {
-        e.preventDefault();
-        setOpen(true);
-      }
-    }
-    window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [open]);
-
-  // Auto-focus input
-  useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 30);
-  }, [open]);
-
-  // Mobile: triple tap to open
-  useEffect(() => {
-    let taps: number[] = [];
-    function onTouch() {
-      if (open) return;
-      const now = Date.now();
-      taps = [...taps.filter((t) => now - t < 600), now];
-      if (taps.length >= 3) {
-        taps = [];
-        setOpen(true);
-      }
-    }
-    document.addEventListener("touchend", onTouch, { passive: true });
-    return () => document.removeEventListener("touchend", onTouch);
-  }, [open]);
+  const changeVariant = (v: Variant) => {
+    setVariant(v);
+    localStorage.setItem(VARIANT_STORAGE_KEY, v);
+  };
 
   return (
-    <main
-      className="fixed inset-0 overflow-hidden transition-colors duration-700"
-      style={{ backgroundColor: authed ? BG_UNLOCKED : BG_LOCKED }}
-    >
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.15)", backdropFilter: "blur(4px)" }}
-          onClick={close}
-        >
-          <div onClick={(e) => e.stopPropagation()}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submit();
-                if (e.key === "Escape") close();
-              }}
-              placeholder=""
-              autoFocus
-              autoCapitalize="off"
-              autoCorrect="off"
-              autoComplete="off"
-              spellCheck={false}
-              className={`bg-transparent border-b border-white/15 px-2 py-2 text-base text-white/70 font-mono focus:outline-none focus:border-white/30 w-56 transition-transform ${
-                shake ? "animate-shake" : ""
-              }`}
-              style={{ caretColor: "rgba(255,255,255,0.4)" }}
-            />
-          </div>
-        </div>
+    <main className="fixed inset-0 overflow-hidden bg-[#06060f]">
+      {mounted && (
+        <>
+          {variant === "combo" && <Combo gate={gate} />}
+          {variant === "shader" && <Shader />}
+          {variant === "typography" && <Typography />}
+          {variant === "particles" && <Particles />}
+          {variant === "cards" && <WorkCards />}
+          {variant === "terminal" && <Terminal gate={gate} />}
+        </>
       )}
+
+      {/* Gate modal only for non-terminal variants (terminal owns the prompt) */}
+      {!TERMINAL_VARIANTS.has(variant) && <GateModal gate={gate} />}
+
+      <VariantSwitcher value={variant} onChange={changeVariant} />
     </main>
   );
 }
