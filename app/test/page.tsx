@@ -10,9 +10,14 @@ import Particles from "../_landing/Particles";
 import WorkCards from "../_landing/WorkCards";
 import Terminal from "../_landing/Terminal";
 import Combo from "../_landing/Combo";
+import Mercury from "../_landing/Mercury";
+import Ascii from "../_landing/Ascii";
+import Spotlight from "../_landing/Spotlight";
+import Tunnel from "../_landing/Tunnel";
+import Sand from "../_landing/Sand";
 import { VARIANT_STORAGE_KEY, type Variant } from "../_landing/variants";
 
-const DEFAULT_VARIANT: Variant = "combo";
+const DEFAULT_VARIANT: Variant = "mercury";
 const TERMINAL_VARIANTS = new Set<Variant>(["terminal", "combo"]);
 
 export default function TestPage() {
@@ -35,6 +40,11 @@ export default function TestPage() {
     <main className="fixed inset-0 overflow-hidden bg-[#06060f]">
       {mounted && (
         <>
+          {variant === "mercury" && <Mercury />}
+          {variant === "ascii" && <Ascii />}
+          {variant === "spotlight" && <Spotlight />}
+          {variant === "tunnel" && <Tunnel />}
+          {variant === "sand" && <Sand />}
           {variant === "combo" && <Combo gate={gate} />}
           {variant === "shader" && <Shader />}
           {variant === "typography" && <Typography />}
