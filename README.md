@@ -1,8 +1,10 @@
 # wooo.uk
 
-Creative developer portfolio — Next.js + React + Tailwind CSS + Three.js
+Personal site. Next.js + Tailwind CSS.
 
-## Getting Started
+A blank slate — purpose TBD.
+
+## Dev
 
 ```bash
 npm run dev

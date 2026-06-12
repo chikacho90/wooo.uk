@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "wooo.uk",
-  description: "Woo Kyung Min",
+  description: "wooo.uk",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
