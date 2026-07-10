@@ -15,7 +15,25 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
   const [busy, setBusy] = useState(false);
   const [showList, setShowList] = useState(false);
   const [hi, setHi] = useState(0);
+  const [kb, setKb] = useState(0); // 키보드 높이(모바일)
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // 모바일: 키보드가 올라온 만큼 커맨드바만 위로 (페이지는 안 움직임)
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const overlap = window.innerHeight - vv.height - vv.offsetTop;
+      setKb(Math.max(0, Math.round(overlap)));
+    };
+    vv.addEventListener("resize", onResize);
+    vv.addEventListener("scroll", onResize);
+    onResize();
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      vv.removeEventListener("scroll", onResize);
+    };
+  }, []);
 
   // 현재 권한에서 갈 수 있는 목적지
   const dests = useMemo(
@@ -150,7 +168,10 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
   const listVisible = showList && open && filtered.length > 0;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center pb-[max(1.5rem,env(safe-area-inset-bottom))] transition-transform duration-150"
+      style={{ transform: kb ? `translateY(-${kb}px)` : undefined }}
+    >
       {msg && <div className="mb-3 text-xs tracking-wide text-neutral-500">{msg}</div>}
 
       {listVisible && (
@@ -202,7 +223,7 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
-            className="w-full bg-transparent text-[15px] text-neutral-100 outline-none placeholder:text-neutral-600"
+            className="w-full bg-transparent text-[16px] text-neutral-100 outline-none placeholder:text-neutral-600"
           />
           {authed && <span className="select-none text-[10px] text-emerald-500/70">●</span>}
           <button
