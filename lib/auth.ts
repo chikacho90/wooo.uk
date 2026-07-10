@@ -65,5 +65,18 @@ export async function verifySession(secret: string, token: string | undefined): 
 
 export const authCookie = { name: COOKIE, maxAge: MAX_AGE };
 
+// 페이지 레지스트리 (커맨드바·help 팔레트 공용)
+export type Dest = { slug: string; label: string; desc: string; hidden: boolean };
+export const DESTINATIONS: Dest[] = [
+  { slug: "", label: "home", desc: "홈", hidden: false },
+  { slug: "dashboard", label: "dashboard", desc: "전체 위젯 한눈에", hidden: true },
+  { slug: "ai", label: "ai", desc: "메모리·시크릿·스킬·자동화·봇", hidden: true },
+  { slug: "memory", label: "memory", desc: "기억", hidden: true },
+  { slug: "server", label: "server", desc: "서버·인프라 상태", hidden: true },
+  { slug: "projects", label: "projects", desc: "GitHub·Vercel 진행", hidden: true },
+  { slug: "ideas", label: "ideas", desc: "아이디어·레퍼런스", hidden: true },
+  { slug: "bots", label: "bots", desc: "텔레그램·디스코드 봇", hidden: true },
+];
+
 // 인증이 필요한(히든) 최상위 경로
-export const HIDDEN_ROUTES = ["dashboard", "memory", "ai", "server", "bots", "ideas", "projects"];
+export const HIDDEN_ROUTES = DESTINATIONS.filter((d) => d.hidden).map((d) => d.slug);

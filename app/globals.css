@@ -8,3 +8,58 @@ html, body {
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
+
+/* ── 갓 태어난 알 ── */
+.egg-wrap {
+  display: inline-block;
+  line-height: 0;
+}
+/* 숨쉬기: 세로로 살짝 부풀었다 꺼지고, 가끔 통째로 꿈틀 */
+.egg-body {
+  animation: egg-breathe 3.4s ease-in-out infinite, egg-wriggle 7s ease-in-out infinite;
+}
+@keyframes egg-breathe {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50%      { transform: scaleY(1.045) scaleX(0.99); }
+}
+@keyframes egg-wriggle {
+  0%, 62%, 100% { rotate: 0deg; translate: 0 0; }
+  68%  { rotate: -4deg; translate: -1px 0; }
+  74%  { rotate: 4deg;  translate: 1px 0; }
+  79%  { rotate: -3deg; translate: -1px 0; }
+  84%  { rotate: 2deg;  translate: 0 0; }
+  88%  { rotate: 0deg; }
+}
+/* 눈 깜빡임 */
+.egg-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: egg-blink 5.5s steps(1, end) infinite;
+}
+@keyframes egg-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+/* 부화 균열: 대부분 숨어있다가 꿈틀할 때 살짝 보임 */
+.egg-crack {
+  opacity: 0;
+  animation: egg-crack 7s ease-in-out infinite;
+}
+@keyframes egg-crack {
+  0%, 66%, 100% { opacity: 0; }
+  72%, 84% { opacity: 0.55; }
+}
+/* 바닥 그림자도 숨결 따라 */
+.egg-shadow {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: egg-shadow 3.4s ease-in-out infinite;
+}
+@keyframes egg-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 0.35; }
+  50%      { transform: scaleX(0.9); opacity: 0.28; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .egg-body, .egg-eye, .egg-crack, .egg-shadow { animation: none; }
+  .egg-crack { opacity: 0; }
+}
