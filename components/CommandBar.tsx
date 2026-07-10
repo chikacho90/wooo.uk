@@ -182,14 +182,21 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
           </svg>
         </button>
       ) : (
-        <div className="pointer-events-auto flex w-[min(92vw,30rem)] items-center gap-2 rounded-2xl border border-neutral-800 bg-neutral-900/85 px-4 py-3 backdrop-blur">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+          className="pointer-events-auto flex w-[min(92vw,30rem)] items-center gap-2 rounded-2xl border border-neutral-800 bg-neutral-900/85 px-4 py-2.5 backdrop-blur"
+        >
           <span className="select-none text-neutral-600">›</span>
           <input
             ref={inputRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKeyDown}
-            onBlur={() => !value && !showList && collapse()}
+            enterKeyHint="go"
+            inputMode="text"
             placeholder={authed ? "이동 · help 로 목록" : "명령 입력 · help"}
             autoComplete="off"
             autoCorrect="off"
@@ -198,7 +205,17 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
             className="w-full bg-transparent text-[15px] text-neutral-100 outline-none placeholder:text-neutral-600"
           />
           {authed && <span className="select-none text-[10px] text-emerald-500/70">●</span>}
-        </div>
+          <button
+            type="submit"
+            aria-label="이동"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-neutral-800 text-neutral-300 transition active:scale-90 disabled:opacity-40"
+            disabled={busy}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h13M13 6l6 6-6 6" />
+            </svg>
+          </button>
+        </form>
       )}
     </div>
   );
