@@ -4,6 +4,18 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "woo.moi",
   description: "woo.moi",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "woo.moi",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: "/apple-icon.png",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
