@@ -182,13 +182,7 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
           </svg>
         </button>
       ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit();
-          }}
-          className="pointer-events-auto flex w-[min(92vw,30rem)] items-center gap-2 rounded-2xl border border-neutral-800 bg-neutral-900/85 px-4 py-2.5 backdrop-blur"
-        >
+        <div className="pointer-events-auto flex w-[min(92vw,30rem)] items-center gap-2 rounded-2xl border border-neutral-800 bg-neutral-900/85 px-4 py-2.5 backdrop-blur">
           <span className="select-none text-neutral-600">›</span>
           <input
             ref={inputRef}
@@ -206,8 +200,9 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
           />
           {authed && <span className="select-none text-[10px] text-emerald-500/70">●</span>}
           <button
-            type="submit"
+            type="button"
             aria-label="이동"
+            onClick={() => submit()}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-neutral-800 text-neutral-300 transition active:scale-90 disabled:opacity-40"
             disabled={busy}
           >
@@ -215,7 +210,7 @@ export default function CommandBar({ authed: initialAuthed }: Props) {
               <path d="M5 12h13M13 6l6 6-6 6" />
             </svg>
           </button>
-        </form>
+        </div>
       )}
     </div>
   );
