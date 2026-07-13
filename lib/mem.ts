@@ -1,8 +1,8 @@
 // wooo-memory MCP(HTTP) 서버사이드 클라이언트.
-// mem.wooo.uk/mcp 는 JSON-RPC + SSE 응답. 서버컴포넌트/route에서만 사용(토큰 노출 금지).
+// mem.woo.moi/mcp 는 JSON-RPC + SSE 응답. 서버컴포넌트/route에서만 사용(토큰 노출 금지).
 import "server-only";
 
-const ENDPOINT = process.env.MEM_URL || "https://mem.wooo.uk/mcp";
+const ENDPOINT = process.env.MEM_URL || "https://mem.woo.moi/mcp";
 const TOKEN = process.env.MEM_TOKEN || "";
 
 type Json = Record<string, unknown>;
