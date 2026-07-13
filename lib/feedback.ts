@@ -6,6 +6,7 @@ export type Feedback = {
   id: number;
   project: string;
   body: string;
+  images: string[]; // data URL 목록
   status: "new" | "queued" | "in_progress" | "done" | "skipped";
   result: string | null;
   created_at: string;
@@ -26,14 +27,16 @@ async function ensure() {
       updated_at timestamptz NOT NULL DEFAULT now()
     )`;
   await sql`CREATE INDEX IF NOT EXISTS idx_feedback_project ON project_feedback(project)`;
+  await sql`ALTER TABLE project_feedback ADD COLUMN IF NOT EXISTS images jsonb NOT NULL DEFAULT '[]'::jsonb`;
   ensured = true;
 }
 
-export async function addFeedback(project: string, body: string): Promise<Feedback | null> {
+export async function addFeedback(project: string, body: string, images: string[] = []): Promise<Feedback | null> {
   try {
     await ensure();
     const { rows } = await sql<Feedback>`
-      INSERT INTO project_feedback (project, body) VALUES (${project}, ${body})
+      INSERT INTO project_feedback (project, body, images)
+      VALUES (${project}, ${body}, ${JSON.stringify(images)}::jsonb)
       RETURNING *`;
     return rows[0] ?? null;
   } catch {

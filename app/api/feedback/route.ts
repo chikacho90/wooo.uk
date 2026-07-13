@@ -17,10 +17,20 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const project = typeof body.project === "string" ? body.project.slice(0, 100) : "";
   const text = typeof body.body === "string" ? body.body.trim().slice(0, 2000) : "";
-  if (!project || !text) {
+  // 이미지: data URL 최대 4장, 장당 2MB·전체 4MB (Vercel 요청 한도 이내)
+  const rawImages = Array.isArray(body.images) ? body.images.slice(0, 4) : [];
+  const images: string[] = [];
+  let totalLen = 0;
+  for (const img of rawImages) {
+    if (typeof img !== "string" || !img.startsWith("data:image/") || img.length > 2_000_000) continue;
+    totalLen += img.length;
+    if (totalLen > 4_000_000) break;
+    images.push(img);
+  }
+  if (!project || (!text && images.length === 0)) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
-  const fb = await addFeedback(project, text);
+  const fb = await addFeedback(project, text, images);
   if (!fb) return NextResponse.json({ error: "failed" }, { status: 500 });
   return NextResponse.json({ ok: true, feedback: fb });
 }
