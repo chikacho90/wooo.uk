@@ -3,6 +3,14 @@ import "server-only";
 
 const GH = "https://api.github.com";
 const OWNER = "chikacho90";
+
+// repo 실제 이름 → 화면 표시 이름 (레포/배포 연결은 그대로, 라벨만)
+const DISPLAY_NAMES: Record<string, string> = {
+  "wooo.uk": "woo.moi",
+};
+export function displayName(repo: string): string {
+  return DISPLAY_NAMES[repo] ?? repo;
+}
 const ghHeaders = {
   Authorization: `Bearer ${process.env.GITHUB_TOKEN || ""}`,
   Accept: "application/vnd.github+json",

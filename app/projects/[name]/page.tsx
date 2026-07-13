@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HubShell, Section, Empty } from "@/components/hub";
-import { getRepo, getCommits, getIssues, getWeeklyActivity, getDeployments, getVercelProjectNames } from "@/lib/projects";
+import { getRepo, getCommits, getIssues, getWeeklyActivity, getDeployments, getVercelProjectNames, displayName } from "@/lib/projects";
 import { getFeedback } from "@/lib/feedback";
 import FeedbackBox from "@/components/FeedbackBox";
 
@@ -54,7 +54,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ name
   const totalCommits8w = weeks.reduce((a, b) => a + b, 0);
 
   return (
-    <HubShell title={name} desc={repo.description || undefined}>
+    <HubShell title={displayName(name)} desc={repo.description || undefined}>
       <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-neutral-500">
         <span>최근 업데이트 {ago(repo.pushed_at)}</span>
         <span>·</span>

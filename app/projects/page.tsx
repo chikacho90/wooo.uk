@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { HubShell, Empty } from "@/components/hub";
-import { getProjects, getVercelProjectNames } from "@/lib/projects";
+import { getProjects, getVercelProjectNames, displayName } from "@/lib/projects";
 import { getFeedbackCounts } from "@/lib/feedback";
 
 export const metadata = { title: "프로젝트 · woo.moi" };
@@ -38,7 +38,7 @@ export default async function Projects() {
                 className="group flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4 transition hover:border-neutral-700 hover:bg-neutral-900/70"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-sm font-semibold text-neutral-200">{r.name}</span>
+                  <span className="truncate font-mono text-sm font-semibold text-neutral-200">{displayName(r.name)}</span>
                   <div className="flex shrink-0 items-center gap-1.5">
                     {deployed && <span className="rounded bg-sky-500/10 px-1.5 py-0.5 text-[9px] text-sky-400">deploy</span>}
                     {r.private && <span className="text-[10px] text-neutral-600">🔒</span>}
