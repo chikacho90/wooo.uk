@@ -17,12 +17,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const project = typeof body.project === "string" ? body.project.slice(0, 100) : "";
   const text = typeof body.body === "string" ? body.body.trim().slice(0, 2000) : "";
-  // 이미지: data URL 최대 4장, 장당 2MB·전체 4MB (Vercel 요청 한도 이내)
+  // 첨부: data URL(이미지 외 일반 파일 포함) 최대 4개, 개당 2MB·전체 4MB (Vercel 요청 한도 이내)
   const rawImages = Array.isArray(body.images) ? body.images.slice(0, 4) : [];
   const images: string[] = [];
   let totalLen = 0;
   for (const img of rawImages) {
-    if (typeof img !== "string" || !img.startsWith("data:image/") || img.length > 2_000_000) continue;
+    if (typeof img !== "string" || !img.startsWith("data:") || img.length > 2_000_000) continue;
     totalLen += img.length;
     if (totalLen > 4_000_000) break;
     images.push(img);
