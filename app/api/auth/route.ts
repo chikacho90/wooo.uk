@@ -1,27 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { signSession, authCookie } from "@/lib/auth";
+import { hitRateLimit, clearRateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
-
-// ── 간이 레이트리밋 (warm 인스턴스 메모리 기준 — 개인용 억제책)
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
-const WINDOW_MS = 5 * 60_000;
-const MAX_TRIES = 10;
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || now > b.resetAt) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_TRIES;
-}
-function resetLimit(ip: string) {
-  buckets.delete(ip);
-}
 
 // 상수시간 문자열 비교 (타이밍 공격 완화)
 function timingSafeEqual(a: string, b: string): boolean {
@@ -45,13 +26,13 @@ export async function POST(req: NextRequest) {
   }
 
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
-  if (rateLimited(ip)) {
+  if (await hitRateLimit(ip)) {
     return NextResponse.json({ type: "unknown" }, { status: 429 });
   }
 
   const value = typeof body.value === "string" ? body.value : "";
   if (password && timingSafeEqual(value, password)) {
-    resetLimit(ip);
+    await clearRateLimit(ip);
     const token = await signSession(secret);
     const res = NextResponse.json({ type: "login" });
     res.cookies.set(authCookie.name, token, {
