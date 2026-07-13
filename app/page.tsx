@@ -14,7 +14,7 @@ export default async function Home() {
       {/* 알+워드마크: 화면 중앙에 고정 — 문서 스크롤/키보드에 안 딸려감 */}
       <div className="pointer-events-none fixed left-1/2 top-[50lvh] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-9">
         <Egg />
-        <h1 className="select-none text-sm font-light tracking-[0.4em] text-neutral-600">
+        <h1 className="select-none text-sm font-light tracking-[0.5em] text-neutral-600">
           woo.moi
         </h1>
       </div>
