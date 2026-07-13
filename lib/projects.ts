@@ -4,10 +4,8 @@ import "server-only";
 const GH = "https://api.github.com";
 const OWNER = "chikacho90";
 
-// repo 실제 이름 → 화면 표시 이름 (레포/배포 연결은 그대로, 라벨만)
-const DISPLAY_NAMES: Record<string, string> = {
-  "wooo.uk": "woo.moi",
-};
+// repo 실제 이름 → 화면 표시 이름 (필요 시 오버라이드; 기본은 그대로)
+const DISPLAY_NAMES: Record<string, string> = {};
 export function displayName(repo: string): string {
   return DISPLAY_NAMES[repo] ?? repo;
 }
