@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { HubShell, Empty } from "@/components/hub";
-import { getProjects, getVercelProjectNames, displayName } from "@/lib/projects";
+import { getProjects, getVercelProjectNames, displayName, EXTERNAL_PROJECTS } from "@/lib/projects";
 import { getFeedbackCounts } from "@/lib/feedback";
 
 export const metadata = { title: "프로젝트 · woo.moi" };
@@ -22,12 +22,34 @@ export default async function Projects() {
     getFeedbackCounts(),
   ]);
 
+  const total = repos.length + EXTERNAL_PROJECTS.length;
+
   return (
-    <HubShell title="프로젝트" desc={`진행중 ${repos.length}개 · 최근 활동순`}>
+    <HubShell title="프로젝트" desc={`진행중 ${total}개 · 최근 활동순`}>
       {repos.length === 0 ? (
         <Empty>프로젝트를 불러오지 못했어요 (GitHub 연결 확인)</Empty>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {EXTERNAL_PROJECTS.map((p) => {
+            const fb = fbCounts[p.name] ?? 0;
+            return (
+              <Link
+                key={p.name}
+                href={`/projects/${p.name}`}
+                className="group flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4 transition hover:border-neutral-700 hover:bg-neutral-900/70"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-mono text-sm font-semibold text-neutral-200">{p.title}</span>
+                  <span className="shrink-0 rounded bg-violet-500/10 px-1.5 py-0.5 text-[9px] text-violet-400">local</span>
+                </div>
+                <p className="mt-1.5 line-clamp-1 text-xs text-neutral-500">{p.description}</p>
+                <div className="mt-4 flex items-center gap-3 text-[11px] text-neutral-600">
+                  <span>GitHub 밖</span>
+                  {fb > 0 && <span className="ml-auto rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-400">피드백 {fb}</span>}
+                </div>
+              </Link>
+            );
+          })}
           {repos.map((r) => {
             const deployed = vercel.has(r.name);
             const fb = fbCounts[r.name] ?? 0;

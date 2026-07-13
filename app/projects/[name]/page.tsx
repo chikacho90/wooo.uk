@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HubShell, Section, Empty } from "@/components/hub";
-import { getRepo, getCommits, getIssues, getWeeklyActivity, getDeployments, getVercelProjectNames, displayName } from "@/lib/projects";
+import { getRepo, getCommits, getIssues, getWeeklyActivity, getDeployments, getVercelProjectNames, getExternalProject, displayName } from "@/lib/projects";
 import { getFeedback } from "@/lib/feedback";
 import FeedbackBox from "@/components/FeedbackBox";
 
@@ -38,8 +38,32 @@ function ActivityBars({ weeks }: { weeks: number[] }) {
   );
 }
 
+// GitHub 밖 프로젝트 — 커밋·배포 없이 설명 + 피드백만
+async function ExternalDetail({ name }: { name: string }) {
+  const ext = getExternalProject(name)!;
+  const feedback = await getFeedback(name);
+  return (
+    <HubShell title={ext.title} desc={ext.description}>
+      <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-neutral-500">
+        <span className="rounded bg-violet-500/10 px-1.5 py-0.5 text-[9px] text-violet-400">local</span>
+        <span className="font-mono">{ext.where}</span>
+      </div>
+
+      <Section title="피드백" count={feedback.length}>
+        <FeedbackBox project={name} initial={feedback} />
+      </Section>
+
+      <div className="mt-8">
+        <Link href="/projects" className="text-xs text-neutral-600 hover:text-neutral-400">← 프로젝트 목록</Link>
+      </div>
+    </HubShell>
+  );
+}
+
 export default async function ProjectDetail({ params }: { params: Promise<{ name: string }> }) {
   const { name } = await params;
+  if (getExternalProject(name)) return <ExternalDetail name={name} />;
+
   const repo = await getRepo(name);
   if (!repo) notFound();
 

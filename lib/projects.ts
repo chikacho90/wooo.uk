@@ -9,6 +9,28 @@ const DISPLAY_NAMES: Record<string, string> = {};
 export function displayName(repo: string): string {
   return DISPLAY_NAMES[repo] ?? repo;
 }
+// GitHub에 없는 프로젝트(회사 업무 등 로컬 전용) — 여기에 수동 등록하면 목록·상세·피드백에 뜬다.
+// 커밋/이슈/배포 데이터는 없으므로 설명·작업위치만 보여준다.
+export type ExternalProject = {
+  name: string; // URL 슬러그
+  title: string; // 표시 이름
+  description: string;
+  where: string; // 실제 작업 위치
+  started: string; // 시작 시점(ISO)
+};
+export const EXTERNAL_PROJECTS: ExternalProject[] = [
+  {
+    name: "samsung-figma-plugin",
+    title: "Samsung Figma Plugin",
+    description: "삼성전자 표준 Asset Figma 플러그인 PoC (아이콘·글로서리)",
+    where: "회사맥 ~/Desktop/2606_Samsung_FigmaPlugin",
+    started: "2026-06-01",
+  },
+];
+export function getExternalProject(name: string): ExternalProject | null {
+  return EXTERNAL_PROJECTS.find((p) => p.name === name) ?? null;
+}
+
 const ghHeaders = {
   Authorization: `Bearer ${process.env.GITHUB_TOKEN || ""}`,
   Accept: "application/vnd.github+json",
