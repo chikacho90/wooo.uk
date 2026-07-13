@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HubShell, Section, Empty } from "@/components/hub";
-import { getRepo, getCommits, getIssues, getWeeklyActivity, getDeployments, getVercelProjectNames, getExternalProject, displayName } from "@/lib/projects";
+import { getRepo, getCommits, getIssues, getWeeklyActivity, getDeployments, getVercelProjectNames, getWuniverseProject, displayName, type WuniverseProject } from "@/lib/projects";
 import { getFeedback } from "@/lib/feedback";
 import FeedbackBox from "@/components/FeedbackBox";
 
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ name: string }> }) {
   const { name } = await params;
-  return { title: `${name} · woo.moi` };
+  return { title: `${decodeURIComponent(name)} · woo.moi` };
 }
 
 function ago(iso: string): string {
@@ -38,19 +38,20 @@ function ActivityBars({ weeks }: { weeks: number[] }) {
   );
 }
 
-// GitHub 밖 프로젝트 — 커밋·배포 없이 설명 + 피드백만
-async function ExternalDetail({ name }: { name: string }) {
-  const ext = getExternalProject(name)!;
-  const feedback = await getFeedback(name);
+// GitHub 밖 wuniverse 프로젝트 — 커밋·배포 없이 폴더 정보 + 피드백
+async function WuniverseDetail({ w }: { w: WuniverseProject }) {
+  const feedback = await getFeedback(w.name);
   return (
-    <HubShell title={ext.title} desc={ext.description}>
+    <HubShell title={w.name} desc={w.description || undefined}>
       <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-neutral-500">
-        <span className="rounded bg-violet-500/10 px-1.5 py-0.5 text-[9px] text-violet-400">local</span>
-        <span className="font-mono">{ext.where}</span>
+        <span className="rounded bg-violet-500/10 px-1.5 py-0.5 text-[9px] text-violet-400">{w.category}</span>
+        <span className="font-mono">{w.path}</span>
+        {w.last_activity && (<><span>·</span><span>최근 작업 {ago(w.last_activity)}</span></>)}
+        {!w.is_git && <span className="text-neutral-600">git 없음 · Syncthing 동기화</span>}
       </div>
 
       <Section title="피드백" count={feedback.length}>
-        <FeedbackBox project={name} initial={feedback} />
+        <FeedbackBox project={w.name} initial={feedback} />
       </Section>
 
       <div className="mt-8">
@@ -61,11 +62,15 @@ async function ExternalDetail({ name }: { name: string }) {
 }
 
 export default async function ProjectDetail({ params }: { params: Promise<{ name: string }> }) {
-  const { name } = await params;
-  if (getExternalProject(name)) return <ExternalDetail name={name} />;
+  const { name: raw } = await params;
+  const name = decodeURIComponent(raw);
 
   const repo = await getRepo(name);
-  if (!repo) notFound();
+  if (!repo) {
+    const w = await getWuniverseProject(name);
+    if (w) return <WuniverseDetail w={w} />;
+    notFound();
+  }
 
   const [commits, issues, weeks, vercel, feedback] = await Promise.all([
     getCommits(name, 10),
