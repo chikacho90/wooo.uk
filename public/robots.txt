@@ -1,4 +1,5 @@
 User-agent: *
-Allow: /
+Allow: /$
+Disallow: /
 
-Sitemap: https://wooo.uk/sitemap.xml
+Sitemap: https://woo.moi/sitemap.xml

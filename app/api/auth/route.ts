@@ -3,10 +3,36 @@ import { signSession, authCookie } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-// 커맨드바에서 입력한 값을 받아 처리.
-// - value 가 비번과 일치 → 로그인(쿠키 발급), {type:"login"}
-// - action === "logout" → 쿠키 삭제, {type:"logout"}
-// - 그 외 → {type:"unknown"} (비번 틀림/미인식 — 무엇이 틀렸는지 안 알려줌)
+// ── 간이 레이트리밋 (warm 인스턴스 메모리 기준 — 개인용 억제책)
+type Bucket = { count: number; resetAt: number };
+const buckets = new Map<string, Bucket>();
+const WINDOW_MS = 5 * 60_000;
+const MAX_TRIES = 10;
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const b = buckets.get(ip);
+  if (!b || now > b.resetAt) {
+    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+  b.count += 1;
+  return b.count > MAX_TRIES;
+}
+function resetLimit(ip: string) {
+  buckets.delete(ip);
+}
+
+// 상수시간 문자열 비교 (타이밍 공격 완화)
+function timingSafeEqual(a: string, b: string): boolean {
+  const len = Math.max(a.length, b.length);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  }
+  return diff === 0;
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const secret = process.env.SITE_SECRET || "";
@@ -18,8 +44,14 @@ export async function POST(req: NextRequest) {
     return res;
   }
 
+  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+  if (rateLimited(ip)) {
+    return NextResponse.json({ type: "unknown" }, { status: 429 });
+  }
+
   const value = typeof body.value === "string" ? body.value : "";
-  if (password && value === password) {
+  if (password && timingSafeEqual(value, password)) {
+    resetLimit(ip);
     const token = await signSession(secret);
     const res = NextResponse.json({ type: "login" });
     res.cookies.set(authCookie.name, token, {
@@ -32,5 +64,7 @@ export async function POST(req: NextRequest) {
     return res;
   }
 
+  // 실패 시 소폭 지연 (무차별 대입 속도 저하)
+  await new Promise((r) => setTimeout(r, 400));
   return NextResponse.json({ type: "unknown" });
 }
